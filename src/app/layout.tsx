@@ -8,6 +8,7 @@ import {
   ThemedTitleV2,
   useNotificationProvider,
   RefineSnackbarProvider,
+  ThemedLayoutV2,
 } from "@refinedev/mui";
 import routerProvider from "@refinedev/nextjs-router";
 
@@ -16,6 +17,7 @@ import { AppIcon } from "@components/app-icon";
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { Header } from "@components/header";
 import { authProviderClient } from "@providers/auth-provider/auth-provider.client";
+// import { BrowserRouter, Routes, Route, Outlet, Link } from "react-router";
 
 export const metadata: Metadata = {
   title: "Refine",
@@ -38,7 +40,6 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Suspense>
-          <GitHubBanner />
           <RefineKbarProvider>
             <ColorModeContextProvider defaultMode={defaultMode}>
               <RefineSnackbarProvider>
@@ -50,7 +51,7 @@ export default function RootLayout({
                     authProvider={authProviderClient}
                     resources={[
                       {
-                        name: "blog_posts",
+                        name: "products",
                         list: "/blog-posts",
                         create: "/blog-posts/create",
                         edit: "/blog-posts/edit/:id",
@@ -58,6 +59,7 @@ export default function RootLayout({
                         meta: {
                           canDelete: true,
                         },
+                        options: { title: "hello" },
                       },
                       {
                         name: "categories",
@@ -68,6 +70,7 @@ export default function RootLayout({
                         meta: {
                           canDelete: true,
                         },
+                        // options: { hide: true },
                       },
                     ]}
                     options={{

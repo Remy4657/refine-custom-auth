@@ -1,5 +1,5 @@
 "use client";
-
+import axios from "axios";
 import type { AuthProvider } from "@refinedev/core";
 import Cookies from "js-cookie";
 
@@ -22,8 +22,19 @@ export const authProviderClient: AuthProvider = {
   login: async ({ email, username, password, remember }) => {
     // Suppose we actually send a request to the back end here.
     const user = mockUsers[0];
-
-    if (user) {
+    console.log("data login: ", { email, username, password, remember });
+    const res = await axios.post("http://localhost:8080/api/v1/user/login", {
+      username: email,
+      password,
+    });
+    console.log("res: ", res);
+    if (res.data.EC == 1) {
+      const user = {
+        name: res.data.DT.payload.userRole.username,
+        email: res.data.DT.payload.userRole.email,
+        roles: "",
+        avatar: "https://i.pravatar.cc/150?img=1",
+      };
       Cookies.set("auth", JSON.stringify(user), {
         expires: 30, // 30 days
         path: "/",

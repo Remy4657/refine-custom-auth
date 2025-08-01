@@ -1,126 +1,123 @@
 "use client";
-
+import { useEffect } from "react";
 import { Autocomplete, Box, Select, TextField } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
+import { HttpError, useOne, useParsed } from "@refinedev/core";
 import { Edit, useAutocomplete } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
+import { useParams } from "next/navigation";
 import React from "react";
 import { Controller } from "react-hook-form";
 
 export default function BlogPostEdit() {
+  // const {
+  //   saveButtonProps,
+  //   refineCore: { queryResult, formLoading, onFinish },
+  //   handleSubmit,
+  //   register,
+  //   control,
+  //   formState: { errors },
+  // } = useForm({
+  //   refineCoreProps: {
+  //     resource: "admin/product/detail",
+  //   },
+  // });
+
+  const { id } = useParsed();
   const {
-    saveButtonProps,
-    refineCore: { queryResult, formLoading, onFinish },
-    handleSubmit,
+    refineCore: { onFinish, formLoading },
     register,
+    handleSubmit,
     control,
+    setValue,
     formState: { errors },
-  } = useForm({});
-
-  const blogPostsData = queryResult?.data?.data;
-
-  const { autocompleteProps: categoryAutocompleteProps } = useAutocomplete({
-    resource: "categories",
-    defaultValue: blogPostsData?.category?.id,
+    saveButtonProps,
+  } = useForm({
+    refineCoreProps: {
+      resource: "product/detail", // Resource bạn muốn custom
+      id, // ID của item cần update
+      action: "edit",
+    },
   });
+  const { data, isLoading, isError } = useOne({
+    resource: "product/detail",
+    id,
+    queryOptions: {
+      select: (data) => data.data.DT, // Lấy data từ trường DT
+    },
+  });
+  const productData = data as any;
+  useEffect(() => {
+    if (productData) {
+      setValue("name", productData.name);
+      setValue("status", productData.status);
+    }
+  }, [productData, setValue]);
+
+  if (isLoading) return <div>Loading...</div>;
+  if (isError) return <div>Error loading product data</div>;
+  const onSubmit = async (values: any) => {
+    try {
+      console.log("value: ", values);
+      // const response = await fetch(`/api/admin/product/update/${id}`, {
+      //   method: "PUT",
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //   },
+      //   body: JSON.stringify(values),
+      // });
+
+      // if (!response.ok) throw new Error("Update failed");
+
+      // const result = await response.json();
+      // console.log("Updated:", result);
+      // Optional: Hiển thị thông báo hoặc điều hướng
+    } catch (error) {
+      console.error("Error updating product:", error);
+    }
+  };
 
   return (
-    <Edit isLoading={formLoading} saveButtonProps={saveButtonProps}>
+    <Edit
+      isLoading={formLoading}
+      saveButtonProps={{
+        onClick: handleSubmit(onSubmit), // keep existing functionality
+        children: "Update Product", // change button text
+        color: "success", // change button color
+        variant: "contained", // change button style
+      }}
+    >
       <Box
         component="form"
         sx={{ display: "flex", flexDirection: "column" }}
         autoComplete="off"
       >
         <TextField
-          {...register("title", {
+          {...register("status", {
             required: "This field is required",
           })}
-          error={!!(errors as any)?.title}
-          helperText={(errors as any)?.title?.message}
+          error={!!(errors as any)?.status}
+          helperText={(errors as any)?.status?.message}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
           type="text"
-          label={"Title"}
-          name="title"
-        />
-        <Controller
-          control={control}
-          name={"category.id"}
-          rules={{ required: "This field is required" }}
-          // eslint-disable-next-line
-          defaultValue={null as any}
-          render={({ field }) => (
-            <Autocomplete
-              {...categoryAutocompleteProps}
-              {...field}
-              onChange={(_, value) => {
-                field.onChange(value.id);
-              }}
-              getOptionLabel={(item) => {
-                return (
-                  categoryAutocompleteProps?.options?.find((p) => {
-                    const itemId =
-                      typeof item === "object"
-                        ? item?.id?.toString()
-                        : item?.toString();
-                    const pId = p?.id?.toString();
-                    return itemId === pId;
-                  })?.title ?? ""
-                );
-              }}
-              isOptionEqualToValue={(option, value) => {
-                const optionId = option?.id?.toString();
-                const valueId =
-                  typeof value === "object"
-                    ? value?.id?.toString()
-                    : value?.toString();
-                return value === undefined || optionId === valueId;
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={"Category"}
-                  margin="normal"
-                  variant="outlined"
-                  error={!!(errors as any)?.category?.id}
-                  helperText={(errors as any)?.category?.id?.message}
-                  required
-                />
-              )}
-            />
-          )}
-        />
-        <Controller
+          label={"Status"}
           name="status"
-          control={control}
-          render={({ field }) => {
-            return (
-              <Select
-                {...field}
-                value={field?.value || "draft"}
-                label={"Status"}
-              >
-                <MenuItem value="draft">Draft</MenuItem>
-                <MenuItem value="published">Published</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
-              </Select>
-            );
-          }}
         />
         <TextField
-          {...register("content", {
+          {...register("name", {
             required: "This field is required",
           })}
-          error={!!(errors as any)?.content}
-          helperText={(errors as any)?.content?.message}
+          error={!!(errors as any)?.name}
+          helperText={(errors as any)?.name?.message}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
           multiline
-          label={"Content"}
-          name="content"
-          rows={4}
+          label={"Name"}
+          name="name"
+          rows={2}
         />
       </Box>
     </Edit>

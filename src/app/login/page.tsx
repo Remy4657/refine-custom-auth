@@ -1,4 +1,5 @@
 import { AuthPage } from "@components/auth-page";
+import SignInForm from "@components/custom-auth-page";
 import { authProviderServer } from "@providers/auth-provider/auth-provider.server";
 import { redirect } from "next/navigation";
 
@@ -9,6 +10,7 @@ export default async function Login() {
     redirect(data?.redirectTo || "/");
   }
 
+  // return <SignInForm />;
   return <AuthPage type="login" />;
 }
 

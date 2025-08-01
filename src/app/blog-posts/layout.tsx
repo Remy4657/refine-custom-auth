@@ -1,8 +1,10 @@
 import React from "react";
 import { ThemedLayoutV2 } from "@refinedev/mui";
 import { Header } from "@components/header";
+import { CustomSider } from "@components/sider";
 import { authProviderServer } from "@providers/auth-provider/auth-provider.server";
 import { redirect } from "next/navigation";
+import LayoutCustom from "@components/layout/ThemeLayoutCustom";
 
 export default async function Layout({ children }: React.PropsWithChildren) {
   const data = await getData();
@@ -11,7 +13,7 @@ export default async function Layout({ children }: React.PropsWithChildren) {
     return redirect(data?.redirectTo || "/login");
   }
 
-  return <ThemedLayoutV2 Header={Header}>{children}</ThemedLayoutV2>;
+  return <LayoutCustom children={children} />;
 }
 
 async function getData() {

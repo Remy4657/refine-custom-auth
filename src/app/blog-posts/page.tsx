@@ -1,7 +1,7 @@
 "use client";
 
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import { useMany } from "@refinedev/core";
+import { useList, useMany, HttpError } from "@refinedev/core";
 import {
   DateField,
   DeleteButton,
@@ -14,98 +14,52 @@ import { Typography } from "@mui/material";
 import React from "react";
 
 export default function BlogPostList() {
-  const { dataGridProps } = useDataGrid({
-    syncWithLocation: true,
+  const { data, isLoading, isError } = useList<any, HttpError>({
+    resource: "product/read",
   });
 
-  const { data: categoryData, isLoading: categoryIsLoading } = useMany({
-    resource: "categories",
-    ids:
-      dataGridProps?.rows
-        ?.map((item: any) => item?.category?.id)
-        .filter(Boolean) ?? [],
-    queryOptions: {
-      enabled: !!dataGridProps?.rows,
-    },
-  });
-
+  // Extract the products array from the response data
+  const products = data?.data?.DT || [];
   const columns = React.useMemo<GridColDef[]>(
     () => [
       {
         field: "id",
         headerName: "ID",
-        type: "number",
-        minWidth: 50,
-        display: "flex",
-        align: "left",
-        headerAlign: "left",
+        width: 70,
       },
       {
-        field: "title",
-        headerName: "Title",
-        minWidth: 200,
-        display: "flex",
-      },
-      {
-        field: "content",
+        field: "name",
+        headerName: "Name",
         flex: 1,
-        headerName: "Content",
-        minWidth: 250,
-        display: "flex",
-        renderCell: function render({ value }) {
-          if (!value) return "-";
-          return (
-            <Typography
-              component="p"
-              whiteSpace="pre"
-              overflow="hidden"
-              textOverflow="ellipsis"
-            >
-              {value}
-            </Typography>
-          );
+        minWidth: 150,
+      },
+      {
+        field: "price",
+        headerName: "Price",
+        width: 120,
+        type: "number",
+        valueFormatter: (params: any) => {
+          return params.toLocaleString() || "";
         },
       },
       {
-        field: "category",
-        headerName: "Category",
-        minWidth: 160,
-        display: "flex",
-        valueGetter: (_, row) => {
-          const value = row?.category;
-          return value;
-        },
-        renderCell: function render({ value }) {
-          return categoryIsLoading ? (
-            <>Loading...</>
-          ) : (
-            categoryData?.data?.find((item) => item.id === value?.id)?.title
-          );
+        field: "priceOld",
+        headerName: "Old Price",
+        width: 120,
+        type: "number",
+        valueFormatter: (params: string) => {
+          return params.toLocaleString() || "";
         },
       },
       {
-        field: "status",
-        headerName: "Status",
-        minWidth: 80,
-        display: "flex",
-      },
-      {
-        field: "createdAt",
-        headerName: "Created at",
-        minWidth: 120,
-        display: "flex",
-        renderCell: function render({ value }) {
-          return <DateField value={value} />;
-        },
+        field: "categoryId",
+        headerName: "Category ID",
+        width: 120,
       },
       {
         field: "actions",
         headerName: "Actions",
-        align: "right",
-        headerAlign: "right",
-        minWidth: 120,
         sortable: false,
-        display: "flex",
         renderCell: function render({ row }) {
           return (
             <>
@@ -117,12 +71,22 @@ export default function BlogPostList() {
         },
       },
     ],
-    [categoryData, categoryIsLoading]
+    []
   );
 
   return (
     <List>
-      <DataGrid {...dataGridProps} columns={columns} />
+      <DataGrid
+        rows={products}
+        columns={columns}
+        pageSizeOptions={[5, 10, 20]}
+        initialState={{
+          pagination: {
+            paginationModel: { pageSize: 10, page: 0 },
+          },
+        }}
+        loading={isLoading}
+      />
     </List>
   );
 }
