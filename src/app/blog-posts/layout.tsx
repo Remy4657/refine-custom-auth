@@ -1,7 +1,4 @@
 import React from "react";
-import { ThemedLayoutV2 } from "@refinedev/mui";
-import { Header } from "@components/header";
-import { CustomSider } from "@components/sider";
 import { authProviderServer } from "@providers/auth-provider/auth-provider.server";
 import { redirect } from "next/navigation";
 import LayoutCustom from "@components/layout/ThemeLayoutCustom";

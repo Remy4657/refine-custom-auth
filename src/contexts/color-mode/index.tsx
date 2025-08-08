@@ -37,10 +37,9 @@ export const ColorModeContextProvider: React.FC<
   }, []);
 
   const systemTheme = useMediaQuery(`(prefers-color-scheme: dark)`);
-
   useEffect(() => {
     if (isMounted) {
-      const theme = Cookies.get("theme") || (systemTheme ? "dark" : "light");
+      const theme = Cookies.get("theme") || "light";
       setMode(theme);
     }
   }, [isMounted, systemTheme]);

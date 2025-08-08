@@ -5,8 +5,12 @@ import { Create, useAutocomplete } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
 import { Controller } from "react-hook-form";
+import axios from "axios";
+import { useNavigation } from "@refinedev/core";
 
 export default function BlogPostCreate() {
+  const { list } = useNavigation();
+
   const {
     saveButtonProps,
     refineCore: { formLoading, onFinish },
@@ -16,106 +20,74 @@ export default function BlogPostCreate() {
     formState: { errors },
   } = useForm({});
 
-  const { autocompleteProps: categoryAutocompleteProps } = useAutocomplete({
-    resource: "categories",
-  });
-
+  // const { autocompleteProps: categoryAutocompleteProps } = useAutocomplete({
+  //   resource: "categories",
+  // });
+  const onSubmit = async (values: any) => {
+    try {
+      console.log("value: ", values);
+      const res = await axios.post(
+        `http://localhost:8080/api/v1/admin/product/create`,
+        { name: values.name, price: values.price, priceOld: values.priceOld }
+      );
+      if (res.status == 200) {
+        list("products");
+      }
+      console.log("res update: ", res);
+    } catch (error) {
+      console.error("Error create product:", error);
+    }
+  };
   return (
-    <Create isLoading={formLoading} saveButtonProps={saveButtonProps}>
+    <Create
+      isLoading={formLoading}
+      saveButtonProps={{
+        onClick: handleSubmit(onSubmit), // keep existing functionality
+      }}
+    >
       <Box
         component="form"
         sx={{ display: "flex", flexDirection: "column" }}
         autoComplete="off"
       >
         <TextField
-          {...register("title", {
+          {...register("name", {
             required: "This field is required",
           })}
-          error={!!(errors as any)?.title}
-          helperText={(errors as any)?.title?.message}
+          error={!!(errors as any)?.name}
+          helperText={(errors as any)?.name?.message}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
           type="text"
-          label={"Title"}
-          name="title"
+          label={"Name"}
+          name="name"
         />
         <TextField
-          {...register("content", {
+          {...register("price", {
             required: "This field is required",
           })}
-          error={!!(errors as any)?.content}
-          helperText={(errors as any)?.content?.message}
+          error={!!(errors as any)?.price}
+          helperText={(errors as any)?.price?.message}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
           multiline
-          label={"Content"}
-          name="content"
+          label={"Price"}
+          name="price"
         />
-        <Controller
-          control={control}
-          name={"category.id"}
-          rules={{ required: "This field is required" }}
-          // eslint-disable-next-line
-          defaultValue={null as any}
-          render={({ field }) => (
-            <Autocomplete
-              {...categoryAutocompleteProps}
-              {...field}
-              onChange={(_, value) => {
-                field.onChange(value.id);
-              }}
-              getOptionLabel={(item) => {
-                return (
-                  categoryAutocompleteProps?.options?.find((p) => {
-                    const itemId =
-                      typeof item === "object"
-                        ? item?.id?.toString()
-                        : item?.toString();
-                    const pId = p?.id?.toString();
-                    return itemId === pId;
-                  })?.title ?? ""
-                );
-              }}
-              isOptionEqualToValue={(option, value) => {
-                const optionId = option?.id?.toString();
-                const valueId =
-                  typeof value === "object"
-                    ? value?.id?.toString()
-                    : value?.toString();
-                return value === undefined || optionId === valueId;
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label={"Category"}
-                  margin="normal"
-                  variant="outlined"
-                  error={!!(errors as any)?.category?.id}
-                  helperText={(errors as any)?.category?.id?.message}
-                  required
-                />
-              )}
-            />
-          )}
-        />
-        <Controller
-          name="status"
-          control={control}
-          render={({ field }) => {
-            return (
-              <Select
-                {...field}
-                value={field?.value || "draft"}
-                label={"Status"}
-              >
-                <MenuItem value="draft">Draft</MenuItem>
-                <MenuItem value="published">Published</MenuItem>
-                <MenuItem value="rejected">Rejected</MenuItem>
-              </Select>
-            );
-          }}
+        <TextField
+          {...register("priceOld", {
+            required: "This field is required",
+          })}
+          error={!!(errors as any)?.priceOld}
+          helperText={(errors as any)?.priceOld?.message}
+          margin="normal"
+          fullWidth
+          InputLabelProps={{ shrink: true }}
+          multiline
+          label={"Old Price"}
+          name="priceOld"
         />
       </Box>
     </Create>

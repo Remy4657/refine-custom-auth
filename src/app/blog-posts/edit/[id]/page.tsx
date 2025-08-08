@@ -8,21 +8,11 @@ import { useForm } from "@refinedev/react-hook-form";
 import { useParams } from "next/navigation";
 import React from "react";
 import { Controller } from "react-hook-form";
+import axios from "axios";
+import { useNavigation } from "@refinedev/core";
 
 export default function BlogPostEdit() {
-  // const {
-  //   saveButtonProps,
-  //   refineCore: { queryResult, formLoading, onFinish },
-  //   handleSubmit,
-  //   register,
-  //   control,
-  //   formState: { errors },
-  // } = useForm({
-  //   refineCoreProps: {
-  //     resource: "admin/product/detail",
-  //   },
-  // });
-
+  const { list, push } = useNavigation();
   const { id } = useParsed();
   const {
     refineCore: { onFinish, formLoading },
@@ -37,41 +27,42 @@ export default function BlogPostEdit() {
       resource: "product/detail", // Resource bạn muốn custom
       id, // ID của item cần update
       action: "edit",
+      queryOptions: {
+        // Transform API response to match form structure
+        select: (response) => {
+          console.log("response: ", response);
+          return {
+            data: response.data.DT, // Extract DT object from response
+          };
+        },
+      },
     },
   });
-  const { data, isLoading, isError } = useOne({
-    resource: "product/detail",
-    id,
-    queryOptions: {
-      select: (data) => data.data.DT, // Lấy data từ trường DT
-    },
-  });
-  const productData = data as any;
-  useEffect(() => {
-    if (productData) {
-      setValue("name", productData.name);
-      setValue("status", productData.status);
-    }
-  }, [productData, setValue]);
-
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading product data</div>;
+  // const { data, isLoading, isError } = useOne({
+  //   resource: "product/detail",
+  //   id,
+  //   queryOptions: {
+  //     select: (data) => data.data.DT, // Lấy data từ trường DT
+  //   },
+  // });
+  // const productData = data as any;
+  // useEffect(() => {
+  //   if (productData) {
+  //     setValue("name", productData.name);
+  //     setValue("status", productData.status);
+  //   }
+  // }, [productData, setValue]);
   const onSubmit = async (values: any) => {
     try {
       console.log("value: ", values);
-      // const response = await fetch(`/api/admin/product/update/${id}`, {
-      //   method: "PUT",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(values),
-      // });
-
-      // if (!response.ok) throw new Error("Update failed");
-
-      // const result = await response.json();
-      // console.log("Updated:", result);
-      // Optional: Hiển thị thông báo hoặc điều hướng
+      const res = await axios.put(
+        `http://localhost:8080/api/v1/admin/product/update`,
+        { id: id, status: values.status, name: values.name }
+      );
+      if (res.status == 200) {
+        list("products");
+      }
+      console.log("res update: ", res);
     } catch (error) {
       console.error("Error updating product:", error);
     }
@@ -79,6 +70,7 @@ export default function BlogPostEdit() {
 
   return (
     <Edit
+      canDelete={false}
       isLoading={formLoading}
       saveButtonProps={{
         onClick: handleSubmit(onSubmit), // keep existing functionality
@@ -95,6 +87,15 @@ export default function BlogPostEdit() {
         <TextField
           {...register("status", {
             required: "This field is required",
+            minLength: {
+              value: 6,
+              message: "Status must be at least 6 characters long",
+            },
+            pattern: {
+              value: /(?=.*[a-z])(?=.*[A-Z])/, // Regular expression to require both lowercase and uppercase letters
+              message:
+                "Status must contain both uppercase and lowercase letters",
+            },
           })}
           error={!!(errors as any)?.status}
           helperText={(errors as any)?.status?.message}
@@ -105,9 +106,18 @@ export default function BlogPostEdit() {
           label={"Status"}
           name="status"
         />
+
         <TextField
           {...register("name", {
             required: "This field is required",
+            minLength: {
+              value: 6,
+              message: "Name must be at least 6 characters long",
+            },
+            pattern: {
+              value: /(?=.*[a-z])(?=.*[A-Z])/, // Regular expression to require both lowercase and uppercase letters
+              message: "Name must contain both uppercase and lowercase letters",
+            },
           })}
           error={!!(errors as any)?.name}
           helperText={(errors as any)?.name?.message}
@@ -117,7 +127,6 @@ export default function BlogPostEdit() {
           multiline
           label={"Name"}
           name="name"
-          rows={2}
         />
       </Box>
     </Edit>
