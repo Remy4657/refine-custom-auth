@@ -45,15 +45,15 @@ export const RefineContext = ({
             <DevtoolsProvider>
               <Refine
                 routerProvider={routerProvider}
-                dataProvider={dataProvider}
+                dataProvider={dataProvider("http://localhost:8080/api/v1")}
                 notificationProvider={useNotificationProvider}
                 authProvider={authProviderClient}
                 i18nProvider={i18nProvider}
                 resources={[
                   {
                     name: "products",
-                    list: "/blog-posts",
-                    create: "/blog-posts/create",
+                    list: "/blog-posts", // http://localhost:3000/blog-posts
+                    create: "/blog-posts/create", // http://localhost:3000/blog-posts/create
                     edit: "/blog-posts/edit/:id",
                     show: "/blog-posts/show/:id",
                     options: {
@@ -73,7 +73,7 @@ export const RefineContext = ({
                     meta: {
                       canDelete: true,
                     },
-                    // options: { hide: true },
+                    options: { hide: true },
                   },
                 ]}
                 options={{

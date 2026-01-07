@@ -4,9 +4,8 @@ import { Autocomplete, Box, MenuItem, Select, TextField } from "@mui/material";
 import { Create, useAutocomplete } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
 import React from "react";
-import { Controller } from "react-hook-form";
-import axios from "axios";
 import { useNavigation } from "@refinedev/core";
+import { createProducts } from "@services/blog-post";
 
 export default function BlogPostCreate() {
   const { list } = useNavigation();
@@ -20,22 +19,14 @@ export default function BlogPostCreate() {
     formState: { errors },
   } = useForm({});
 
-  // const { autocompleteProps: categoryAutocompleteProps } = useAutocomplete({
-  //   resource: "categories",
-  // });
   const onSubmit = async (values: any) => {
-    try {
-      console.log("value: ", values);
-      const res = await axios.post(
-        `http://localhost:8080/api/v1/admin/product/create`,
-        { name: values.name, price: values.price, priceOld: values.priceOld }
-      );
-      if (res.status == 200) {
-        list("products");
-      }
-      console.log("res update: ", res);
-    } catch (error) {
-      console.error("Error create product:", error);
+    const res = await createProducts(
+      values.name,
+      values.price,
+      values.priceOld
+    );
+    if (!!res) {
+      list("products");
     }
   };
   return (

@@ -1,7 +1,8 @@
 import { AuthPage } from "@components/auth-page";
-import SignInForm from "@components/custom-auth-page";
+import SignInForm from "@components/custom-auth-page/login";
 import { authProviderServer } from "@providers/auth-provider/auth-provider.server";
 import { redirect } from "next/navigation";
+import CustomLoginPage from "@components/custom-auth-page/login";
 
 export default async function Login() {
   const data = await getData();
@@ -11,7 +12,7 @@ export default async function Login() {
   }
 
   // return <SignInForm />;
-  return <AuthPage type="login" />;
+  return <CustomLoginPage />;
 }
 
 async function getData() {

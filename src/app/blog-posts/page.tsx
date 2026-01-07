@@ -1,24 +1,12 @@
 "use client";
 
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
-import {
-  useList,
-  useMany,
-  HttpError,
-  useTranslate,
-  useTranslation,
-} from "@refinedev/core";
-import {
-  DateField,
-  DeleteButton,
-  EditButton,
-  List,
-  ShowButton,
-} from "@refinedev/mui";
+import { useList, HttpError, useTranslate } from "@refinedev/core";
+import { DeleteButton, EditButton, List } from "@refinedev/mui";
 import React from "react";
-import axios from "axios";
 
 import LanguageSwitcher from "@components/change-language";
+import { deleteProducts } from "@services/blog-post";
 
 export default function BlogPostList() {
   // Define your interfaces
@@ -46,23 +34,18 @@ export default function BlogPostList() {
     DataResponse,
     HttpError
   >({
-    resource: "product/read",
+    resource: "product/read", // define link api
+    pagination: {
+      mode: "off",
+    },
   });
   // Extract the products array from the response data
   const products = data?.data.DT || [];
+
   const handleDelete = async (id: any) => {
-    console.log("delete action: ", id);
-    try {
-      const res = await axios.delete(
-        "http://localhost:8080/api/v1/admin/product/delete",
-        { data: { id: id } }
-      );
-      if (res.status == 200) {
-        await refetch();
-      }
-      console.log("res delete: ", res);
-    } catch (error) {
-      console.log("error: ", error);
+    const res = await deleteProducts(id);
+    if (res) {
+      await refetch();
     }
   };
 
@@ -136,7 +119,7 @@ export default function BlogPostList() {
             <>
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <EditButton hideText recordItemId={row.id} />
-                <ShowButton hideText recordItemId={row.id} />
+                {/* <ShowButton hideText recordItemId={row.id} /> */}
                 <div>
                   <DeleteButton
                     onClick={() => handleDelete(row.id)}
@@ -157,14 +140,13 @@ export default function BlogPostList() {
 
   return (
     <div>
-      <LanguageSwitcher />
       <h1>{translate("blog_posts.fields.status.title")}</h1>
       <List>
         <DataGrid
-          disableColumnMenu
-          rows={products}
-          columns={columns}
-          pageSizeOptions={[5, 10, 20, 50]}
+          // disableColumnMenu
+          rows={products} // define products array to display on UI
+          columns={columns} // define header of table
+          pageSizeOptions={[5, 10, 20, 50]} // options array of item per page
           initialState={{
             pagination: {
               paginationModel: { pageSize: 5, page: 0 },

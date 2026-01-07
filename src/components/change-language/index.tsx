@@ -1,13 +1,15 @@
 "use client";
-import { useSetLocale, useTranslation } from "@refinedev/core";
+
+import { useTranslation } from "@refinedev/core";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
+import { FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 
 const LanguageSwitcher = () => {
   const { changeLocale, getLocale } = useTranslation();
-  const [currentLocale, setCurrentLocale] = useState<string>("en"); // Giá trị mặc định
+  const [currentLocale, setCurrentLocale] = useState<string>("en");
 
-  // Đồng bộ giá trị ngôn ngữ khi component mount trên client
+  // Load saved locale from cookies on mount
   useEffect(() => {
     const cookieLocale = Cookies.get("NEXT_LOCALE");
     const detectedLocale = cookieLocale || getLocale() || "en";
@@ -17,25 +19,21 @@ const LanguageSwitcher = () => {
   const handleChangeLanguage = (value: string) => {
     changeLocale(value);
     Cookies.set("NEXT_LOCALE", value, { expires: 365 });
-    setCurrentLocale(value); // Cập nhật state ngay lập tức
+    setCurrentLocale(value);
   };
 
   return (
-    <div>
-      <span>Languages</span>
-      <button
-        disabled={currentLocale === "en"}
-        onClick={() => handleChangeLanguage("en")}
+    <FormControl size="small" sx={{ minWidth: 120, color: "#fff" }}>
+      <Select
+        labelId="language-select-label"
+        value={currentLocale}
+        onChange={(e) => handleChangeLanguage(e.target.value)}
+        sx={{ color: "#fff", border: "1px solid #fff", fontSize: "14px" }}
       >
-        English
-      </button>
-      <button
-        disabled={currentLocale === "vi"}
-        onClick={() => handleChangeLanguage("vi")}
-      >
-        Vie
-      </button>
-    </div>
+        <MenuItem value="en">English</MenuItem>
+        <MenuItem value="vi">Tiếng Việt</MenuItem>
+      </Select>
+    </FormControl>
   );
 };
 

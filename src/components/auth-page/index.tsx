@@ -3,10 +3,12 @@ import { AuthPage as AuthPageBase } from "@refinedev/mui";
 import type { AuthPageProps } from "@refinedev/core";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { TextField } from "@mui/material";
 
 // Định nghĩa schema validation bằng Zod
 const authSchema = z.object({
   email: z.string().min(1, "Email là bắt buộc"),
+  phone: z.string().min(1, "Phone là bắt buộc"),
   password: z
     .string()
     .min(4, "Mật khẩu phải có ít nhất 4 ký tự")

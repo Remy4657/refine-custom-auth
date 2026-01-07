@@ -1,71 +1,108 @@
+// "use client";
+// import { Box, TextField } from "@mui/material";
+// import { HttpError, useParsed, useNavigation } from "@refinedev/core";
+// import { Edit } from "@refinedev/mui";
+// import { useForm } from "@refinedev/react-hook-form";
+// import { editProducts } from "@services/blog-post";
+// import { productValidationRules } from "@/lib/schema"; // import rules
+
+// export default function BlogPostEdit() {
+//   const { list } = useNavigation();
+//   const { id } = useParsed();
+
+//   const {
+//     refineCore: { formLoading },
+//     register,
+//     handleSubmit,
+//     formState: { errors },
+//   } = useForm<any, HttpError>({
+//     refineCoreProps: {
+//       resource: "product/detail",
+//       id,
+//       action: "edit",
+//       queryOptions: {
+//         select: (response) => ({ data: response.data.DT }),
+//       },
+//     },
+//   });
+
+//   const onSubmit = async (values: any) => {
+//     const res = await editProducts(id, values.status, values.name);
+//     if (res) list("products");
+//   };
+
+//   return (
+//     <Edit
+//       canDelete={false}
+//       isLoading={formLoading}
+//       saveButtonProps={{
+//         onClick: handleSubmit(onSubmit),
+//         children: "Update Product",
+//         color: "success",
+//         variant: "contained",
+//       }}
+//     >
+//       <Box component="form" sx={{ display: "flex", flexDirection: "column" }}>
+//         <TextField
+//           {...register("name", productValidationRules.name)}
+//           error={!!errors.name}
+//           helperText={errors.name?.message as string}
+//           margin="normal"
+//           fullWidth
+//           InputLabelProps={{ shrink: true }}
+//           label="Name"
+//         />
+//         <TextField
+//           {...register("status", productValidationRules.status)}
+//           error={!!errors.status}
+//           helperText={errors.status?.message as string}
+//           margin="normal"
+//           fullWidth
+//           InputLabelProps={{ shrink: true }}
+//           label="Status"
+//         />
+//       </Box>
+//     </Edit>
+//   );
+// }
+
 "use client";
-import { useEffect } from "react";
-import { Autocomplete, Box, Select, TextField } from "@mui/material";
-import MenuItem from "@mui/material/MenuItem";
-import { HttpError, useOne, useParsed } from "@refinedev/core";
-import { Edit, useAutocomplete } from "@refinedev/mui";
+
+import { Box, TextField } from "@mui/material";
+import { HttpError, useParsed, useNavigation } from "@refinedev/core";
+import { Edit } from "@refinedev/mui";
 import { useForm } from "@refinedev/react-hook-form";
-import { useParams } from "next/navigation";
-import React from "react";
-import { Controller } from "react-hook-form";
-import axios from "axios";
-import { useNavigation } from "@refinedev/core";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { editProducts } from "@services/blog-post";
+import { productSchema, ProductFormValues } from "@/lib/schema";
 
 export default function BlogPostEdit() {
-  const { list, push } = useNavigation();
+  const { list } = useNavigation();
   const { id } = useParsed();
+
   const {
-    refineCore: { onFinish, formLoading },
+    refineCore: { formLoading },
     register,
     handleSubmit,
-    control,
-    setValue,
     formState: { errors },
-    saveButtonProps,
   } = useForm({
+    resolver: zodResolver(productSchema), // Dùng Zod để validate
     refineCoreProps: {
-      resource: "product/detail", // Resource bạn muốn custom
-      id, // ID của item cần update
+      resource: "product/detail",
+      id,
       action: "edit",
       queryOptions: {
-        // Transform API response to match form structure
-        select: (response) => {
-          console.log("response: ", response);
-          return {
-            data: response.data.DT, // Extract DT object from response
-          };
-        },
+        select: (response) => ({
+          data: response.data.DT,
+        }),
       },
     },
   });
-  // const { data, isLoading, isError } = useOne({
-  //   resource: "product/detail",
-  //   id,
-  //   queryOptions: {
-  //     select: (data) => data.data.DT, // Lấy data từ trường DT
-  //   },
-  // });
-  // const productData = data as any;
-  // useEffect(() => {
-  //   if (productData) {
-  //     setValue("name", productData.name);
-  //     setValue("status", productData.status);
-  //   }
-  // }, [productData, setValue]);
-  const onSubmit = async (values: any) => {
-    try {
-      console.log("value: ", values);
-      const res = await axios.put(
-        `http://localhost:8080/api/v1/admin/product/update`,
-        { id: id, status: values.status, name: values.name }
-      );
-      if (res.status == 200) {
-        list("products");
-      }
-      console.log("res update: ", res);
-    } catch (error) {
-      console.error("Error updating product:", error);
-    }
+
+  const onSubmit = async (values: ProductFormValues) => {
+    const res = await editProducts(id, values.status, values.name);
+    if (res) list("products");
   };
 
   return (
@@ -73,60 +110,30 @@ export default function BlogPostEdit() {
       canDelete={false}
       isLoading={formLoading}
       saveButtonProps={{
-        onClick: handleSubmit(onSubmit), // keep existing functionality
-        children: "Update Product", // change button text
-        color: "success", // change button color
-        variant: "contained", // change button style
+        onClick: handleSubmit(onSubmit),
+        children: "Update Product",
+        color: "success",
+        variant: "contained",
       }}
     >
-      <Box
-        component="form"
-        sx={{ display: "flex", flexDirection: "column" }}
-        autoComplete="off"
-      >
+      <Box component="form" sx={{ display: "flex", flexDirection: "column" }}>
         <TextField
-          {...register("status", {
-            required: "This field is required",
-            minLength: {
-              value: 6,
-              message: "Status must be at least 6 characters long",
-            },
-            pattern: {
-              value: /(?=.*[a-z])(?=.*[A-Z])/, // Regular expression to require both lowercase and uppercase letters
-              message:
-                "Status must contain both uppercase and lowercase letters",
-            },
-          })}
-          error={!!(errors as any)?.status}
-          helperText={(errors as any)?.status?.message}
+          {...register("name")}
+          error={!!errors.name}
+          helperText={errors.name?.message as string}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
-          type="text"
-          label={"Status"}
-          name="status"
+          label="Name"
         />
-
         <TextField
-          {...register("name", {
-            required: "This field is required",
-            minLength: {
-              value: 6,
-              message: "Name must be at least 6 characters long",
-            },
-            pattern: {
-              value: /(?=.*[a-z])(?=.*[A-Z])/, // Regular expression to require both lowercase and uppercase letters
-              message: "Name must contain both uppercase and lowercase letters",
-            },
-          })}
-          error={!!(errors as any)?.name}
-          helperText={(errors as any)?.name?.message}
+          {...register("status")}
+          error={!!errors.status}
+          helperText={errors.status?.message as string}
           margin="normal"
           fullWidth
           InputLabelProps={{ shrink: true }}
-          multiline
-          label={"Name"}
-          name="name"
+          label="Status"
         />
       </Box>
     </Edit>

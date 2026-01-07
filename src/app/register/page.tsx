@@ -1,6 +1,7 @@
 import { AuthPage } from "@components/auth-page";
 import { authProviderServer } from "@providers/auth-provider/auth-provider.server";
 import { redirect } from "next/navigation";
+import CustomRegisterPage from "@components/custom-auth-page/register";
 
 export default async function Register() {
   const data = await getData();
@@ -9,7 +10,7 @@ export default async function Register() {
     redirect(data?.redirectTo || "/");
   }
 
-  return <AuthPage type="register" />;
+  return <CustomRegisterPage />;
 }
 
 async function getData() {

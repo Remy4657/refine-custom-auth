@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { ColorModeContext } from "@contexts/color-mode";
 import DarkModeOutlined from "@mui/icons-material/DarkModeOutlined";
 import LightModeOutlined from "@mui/icons-material/LightModeOutlined";
@@ -24,6 +24,7 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 
 import Logout from "@mui/icons-material/Logout";
+import LanguageSwitcher from "@components/change-language";
 
 type IUser = {
   id: number;
@@ -34,6 +35,7 @@ type IUser = {
 export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   sticky = true,
 }) => {
+  const router = useRouter();
   const { mode, setMode } = useContext(ColorModeContext);
   const { data: user } = useGetIdentity<IUser>();
   const authProvider = useActiveAuthProvider();
@@ -44,6 +46,9 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
 
   const handleLogout = () => {
     mutateLogout();
+  };
+  const handleSetting = () => {
+    router.push("/settings");
   };
 
   return (
@@ -56,6 +61,8 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             justifyContent="flex-end"
             alignItems="center"
           >
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}></Box>
+            <LanguageSwitcher />
             <HamburgerMenu />
             <Stack
               direction="row"
@@ -111,6 +118,23 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
                             horizontal: "right",
                           }}
                         >
+                          <ListItemButton
+                            onClick={() => handleSetting()}
+                            sx={{
+                              justifyContent: "start",
+                            }}
+                          >
+                            <ListItemIcon
+                              sx={{
+                                justifyContent: "start",
+                                minWidth: "24px",
+                                transition: "margin-right 0.3s",
+                                color: "currentColor",
+                              }}
+                            >
+                              Setting
+                            </ListItemIcon>
+                          </ListItemButton>
                           <ListItemButton
                             key="logout"
                             onClick={() => handleLogout()}

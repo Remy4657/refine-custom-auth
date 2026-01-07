@@ -11,6 +11,7 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import type { RefineThemedLayoutV2HeaderProps } from "@refinedev/mui";
+import LanguageSwitcher from "@components/change-language";
 
 export const ThemedHeaderV2: React.FC<RefineThemedLayoutV2HeaderProps> = ({
   isSticky,

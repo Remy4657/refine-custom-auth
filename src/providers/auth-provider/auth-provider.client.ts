@@ -27,12 +27,11 @@ export const authProviderClient: AuthProvider = {
       username: email,
       password,
     });
-    console.log("res: ", res);
     if (res.data.EC == 1) {
       const user = {
         name: res.data.DT.payload.userRole.username,
         email: res.data.DT.payload.userRole.email,
-        roles: "",
+        roles: "admin",
         avatar: "https://i.pravatar.cc/150?img=1",
       };
       Cookies.set("auth", JSON.stringify(user), {
@@ -51,6 +50,13 @@ export const authProviderClient: AuthProvider = {
         name: "LoginError",
         message: "Invalid username or password",
       },
+    };
+  },
+  register: async ({ email, username, password }) => {
+    console.log("email, password: ", email, password);
+    return {
+      success: true,
+      // redirectTo: "/",
     };
   },
   logout: async () => {
